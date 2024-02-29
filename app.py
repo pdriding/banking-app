@@ -8,7 +8,7 @@ from werkzeug.security import check_password_hash, generate_password_hash
 from helpers import apology, login_required, usd
 
 # Configure application
-app = Flask(__name__)
+app = Flask(__name__, static_folder='static')
 
 # # Custom filter
 # app.jinja_env.filters["usd"] = usd
@@ -31,7 +31,7 @@ def after_request(response):
     return response
 
 @app.route("/")
-# @login_required
+@login_required
 def index():
     return apology("Sorry not found")
 
@@ -42,21 +42,31 @@ def login():
 
 @app.route("/register", methods=["GET", "POST"])
 def register():
-      if request.method == 'POST':
+    if request.method == 'POST':
         # Get data from the registration form
         username = request.form.get('username')
-        password = request.form.get('password')
+        if not username:
+            return apology("must provide username", 403)
+        
+        confirmation = request.form.get('password')
+        if not confirmation:
+            return apology("please choose a password", 403)
+        
         deposit_amount = request.form.get('deposit')
+        if not deposit_amount:
+            return apology("please deposit amount", 403)
+        
+        # Generate a password hash
+        hashed_password = generate_password_hash(confirmation)
+        
+        db.execute("CREATE TABLE IF NOT EXISTS users (id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, username TEXT NOT NULL, hash TEXT NOT NULL, cash NUMERIC NOT NULL)")
 
-        # Process the registration (e.g., save to database)
+        # Add to database
+        db.execute("INSERT INTO users (username, hash, cash) VALUES(?, ?, ?)", username, hashed_password, deposit_amount)
+        return render_template('register.html')
         
 
-        # Once registration is done, return a response
-        return jsonify({
-            'username': username,
-            'password': password,
-            'deposit_amount': deposit_amount
-        })
-
+    else:
         # If it's a GET request, just return the registration page
-      return render_template('register.html')
+        return render_template('register.html')
+

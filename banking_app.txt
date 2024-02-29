@@ -1,0 +1,33 @@
+banking_app/
+│
+├── app/
+│   ├── controllers/
+│   │   ├── auth.py            # Controller for authentication routes (login, register, logout)
+│   │   └── main.py            # Controller for main application routes (dashboard, transactions, etc.)
+│   │
+│   ├── models/
+│   │   ├── user.py            # Model for user data and interactions
+│   │   ├── account.py         # Model for bank account data and interactions
+│   │   └── transaction.py     # Model for transaction data and interactions
+│   │
+│   ├── static/
+│   │   ├── css/               # CSS files for styling
+│   │   ├── js/                # JavaScript files for client-side interactions
+│   │   └── img/               # Images and icons
+│   │
+│   ├── templates/
+│   │   ├── auth/              # HTML templates for authentication pages (login, register)
+│   │   ├── main/              # HTML templates for main application pages (dashboard, transactions)
+│   │   └── layout.html        # Base template with common elements (header, footer)
+│   │
+│   ├── __init__.py            # Initialize Flask app and configure extensions
+│   ├── config.py              # Configuration settings for the app
+│   └── extensions.py          # Initialize Flask extensions (e.g., database, session)
+│
+├── migrations/                # Database migrations (if using SQLAlchemy)
+│
+├── tests/                      # Unit tests for the application
+│
+├── .gitignore                 # List of files to ignore by version control
+├── requirements.txt           # List of Python dependencies
+└── run.py                     # Entry point to run the Flask app
