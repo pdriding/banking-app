@@ -1,0 +1,148 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: inherit;
+}
+
+html {
+  font-size: 62.5%;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: "Poppins", sans-serif;
+  color: #444;
+  background-color: #f3f3f3;
+  height: 100vh;
+  padding: 2rem;
+}
+
+nav {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 2rem;
+}
+
+.welcome {
+  font-size: 1.9rem;
+  font-weight: 500;
+  width: 20rem;
+}
+
+.logo {
+  height: 5.25rem;
+  display: block;
+  margin: 0 auto;
+}
+
+/* LOGIN FORM */
+
+.register-form,
+.login-form {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding-top: 25vh;
+}
+
+.login-nav {
+  display: flex;
+  gap: 3rem;
+  list-style: none;
+  align-items: center;
+  font-size: 1.5em;
+  width: 20rem;
+  justify-content: flex-end;
+}
+
+.register__input,
+.login__input {
+  border: none;
+  padding: 0.5rem 2rem;
+  font-size: 1.6rem;
+  font-family: inherit;
+  text-align: center;
+  width: 20rem;
+  border-radius: 10rem;
+  color: inherit;
+  border: 1px solid #fff;
+  transition: all 0.3s;
+}
+
+.register__input,
+.login__input:focus {
+  outline: none;
+  border: 1px solid #ccc;
+}
+
+.register__input,
+.login__input::placeholder {
+  color: #bbb;
+}
+
+.login__btn {
+  border: none;
+  background: none;
+  font-size: 2.2rem;
+  color: inherit;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.register__btn:hover,
+.register__btn:focus,
+.login__btn:hover,
+.login__btn:focus,
+.btn--sort:hover,
+.btn--sort:focus {
+  outline: none;
+  color: #777;
+}
+
+/*  -- REGISTER -- */
+
+.register__btn {
+  font-size: 2.2rem;
+  color: #007bff !important;
+  font-weight: 50;
+  color: inherit;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+/* CSS for overlay */
+.overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 99999;
+  backdrop-filter: blur(4px);
+  transition: all 1s;
+  opacity: 1;
+}
+
+.new-form-container {
+  border-radius: 5px;
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  height: 20%;
+  width: 30%;
+  transform: translate(-50%, -50%);
+  background-color: #fff;
+  border: 1px solid #ccc;
+  padding: 30px;
+  z-index: 999999999;
+
+  transition: opacity 0.5s ease-in-out;
+  opacity: 1;
+}
+
+.hidden {
+  display: none;
+}

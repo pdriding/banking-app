@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+
+    <!-- http://getbootstrap.com/docs/5.3/ -->
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+      integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN"
+      crossorigin="anonymous"
+    />
+    <script
+      src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"
+      integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL"
+      crossorigin="anonymous"
+    ></script>
+
+    <link rel="shortcut icon" type="image/png" href="static/images/icon.png" />
+
+    <link
+      href="https://fonts.googleapis.com/css?family=Poppins:400,500,600&display=swap"
+      rel="stylesheet"
+    />
+
+    <link href="/static//css/styles.css" rel="stylesheet" />
+
+    <title>Banksy App: {% block title %}{% endblock %}</title>
+  </head>
+  <body>
+    <!-- NAVIGATION -->
+    <nav>
+      {% if session["user_id"] %} TODO
+      <p class="welcome">Welcome</p>
+      <img src="static/images/logo.png" alt="Logo" class="logo" />
+      <ul class="navbar-nav ms-auto mt-2">
+        <li class="nav-item">
+          <a class="nav-link" href="/logout">Log Out</a>
+        </li>
+      </ul>
+      {% else %}
+      <p class="welcome">Log in to get started</p>
+      <div class="text-center">
+        <img
+          src="{{ url_for('static', filename='images/logo.png') }}"
+          alt="Logo"
+          class="logo"
+        />
+      </div>
+
+      <ul class="login-nav">
+        <li class="nav-item">
+          <a class="nav-link" href="/register">Register</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="/login">Log In</a>
+        </li>
+      </ul>
+    </nav>
+    {% endif %} {% if get_flashed_messages() %}
+    <header>
+      <div class="alert alert-primary mb-0 text-center" role="alert">
+        {{ get_flashed_messages() | join(" ") }}
+      </div>
+    </header>
+    {% endif %}
+
+    <main class="app container py-5 text-center">
+      {% block main %}{% endblock %}
+    </main>
+
+    <footer class="fixed-bottom py-3">
+      <div class="container d-flex justify-content-center">
+        <span>&copy; by Peter Riding</span>
+      </div>
+    </footer>
+    <!-- <script src="script.js"></script> -->
+    <script>
+      const overlay = document.querySelector(".overlay");
+      const popupForm = document.querySelector(".new-form-container");
+      // Get references to the register form and new form container
+      const registerForm = document.querySelector(".register-form");
+      const newForm = document.querySelector(".depositForm");
+
+      registerForm.addEventListener("submit", function (event) {
+        event.preventDefault(); // Prevent form submission
+
+        // Show overlay
+        overlay.style.display = "block";
+
+        // // Apply blur effect to background
+        document.body.classList.add("blur-background");
+        // document.querySelector(".overlay").classList.add("blur-background");
+
+        // Show new form container
+        popupForm.style.display = "block";
+      });
+
+      // Add event listener to the deposit amount form submit button
+      newForm.addEventListener("submit", function (event) {
+        // Prevent the default form submission behavior
+        event.preventDefault();
+
+        // Gather data from both forms
+        const registerFormData = new FormData(registerForm);
+        const newFormData = new FormData(newForm);
+
+        // Clear form
+        registerForm.reset();
+        newForm.reset();
+
+        // Combine data from both forms into a single FormData object
+        const combinedFormData = new FormData();
+        for (const [key, value] of registerFormData.entries()) {
+          combinedFormData.append(key, value);
+        }
+        for (const [key, value] of newFormData.entries()) {
+          combinedFormData.append(key, value);
+        }
+
+        // Make an AJAX request to the Flask server
+        fetch("/register", {
+          method: "POST",
+          body: combinedFormData,
+        })
+          .then((response) => response.text())
+          .then((data) => {
+            // Handle the response as needed
+            console.log("Forms submitted successfully:", data);
+          })
+          .catch((error) => {
+            console.error("Error:", error);
+          });
+
+        overlay.style.display = "none";
+        popupForm.style.display = "none";
+      });
+
+      document.querySelector(".overlay").addEventListener("click", () => {
+        // Hide the overlay and new form container
+        overlay.style.display = "none";
+        popupForm.style.display = "none";
+      });
+    </script>
+  </body>
+</html>

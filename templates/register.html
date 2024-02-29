@@ -1,0 +1,44 @@
+{% extends "layout.html" %} {% block title %} Register {% endblock %} {% block
+main %}
+<div class="container d-flex justify-content-center align-items-center">
+  <div class="row">
+    <form action="/register" method="post" class="register-form">
+      <div class="mb-3">
+        <input
+          autocomplete="off"
+          autofocus
+          class="form-control-1 register__input register__input--user"
+          name="username"
+          placeholder="user"
+          type="text"
+        />
+      </div>
+      <div class="mb-3">
+        <input
+          class="form-control-1 register__input register__input--pin"
+          name="password"
+          placeholder="PIN"
+          type="password"
+        />
+      </div>
+      <button class="btn register__btn" type="submit">&plus;</button>
+    </form>
+  </div>
+  <!-- Overlay -->
+  <div class="overlay hidden"></div>
+  <!-- New form container -->
+  <div class="container new-form-container hidden">
+    <form action="/register" class="depositForm">
+      <h2>Deposit amount?</h2>
+      <input
+        type="text"
+        name="deposit"
+        autofocus
+        class="form-control-1 register__input register__input--pin"
+      />
+      <button class="btn register__btn" type="submit">&plus;</button>
+    </form>
+  </div>
+</div>
+
+{% endblock %}
