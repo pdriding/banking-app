@@ -31,9 +31,9 @@ def after_request(response):
     return response
 
 @app.route("/")
-@login_required
+# @login_required
 def index():
-    return apology("Sorry not found")
+    return render_template('index.html')
 
 @app.route("/login", methods=["GET", "POST"])
 def login():
@@ -43,27 +43,26 @@ def login():
 @app.route("/register", methods=["GET", "POST"])
 def register():
     if request.method == 'POST':
-        # Get data from the registration form
         username = request.form.get('username')
         if not username:
-            return apology("must provide username", 403)
+            return jsonify({"success": False, "message": "Must provide username"}), 400
         
         confirmation = request.form.get('password')
         if not confirmation:
-            return apology("please choose a password", 403)
+            return jsonify({"success": False, "message": "Please choose a password"}), 400
         
         deposit_amount = request.form.get('deposit')
         if not deposit_amount:
-            return apology("please deposit amount", 403)
+            return jsonify({"success": False, "message": "Please deposit amount"}), 400
         
-        # Generate a password hash
         hashed_password = generate_password_hash(confirmation)
         
-        db.execute("CREATE TABLE IF NOT EXISTS users (id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, username TEXT NOT NULL, hash TEXT NOT NULL, cash NUMERIC NOT NULL)")
-
-        # Add to database
-        db.execute("INSERT INTO users (username, hash, cash) VALUES(?, ?, ?)", username, hashed_password, deposit_amount)
-        return render_template('register.html')
+        try:
+            db.execute("INSERT INTO users (username, hash, cash) VALUES (?, ?, ?)", username, hashed_password, deposit_amount)
+            return jsonify({"success": True}), 200
+        except Exception as e:
+            print("Database Error:", e)
+            return jsonify({"success": False, "message": "An error occurred while registering"}), 500
         
 
     else:

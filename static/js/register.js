@@ -1,9 +1,4 @@
 document.addEventListener("DOMContentLoaded", function () {
-  // Your JavaScript code here
-  console.log("DOM fully loaded and parsed");
-
-  console.log("helo");
-
   const overlay = document.querySelector(".overlay");
   const popupForm = document.querySelector(".new-form-container");
   // Get references to the register form and new form container
@@ -51,10 +46,14 @@ document.addEventListener("DOMContentLoaded", function () {
       method: "POST",
       body: combinedFormData,
     })
-      .then((response) => response.text())
+      .then((response) => response.json())
       .then((data) => {
-        // Handle the response as needed
-        console.log("Forms submitted successfully:", data);
+        if (data.success) {
+          window.location.href = "/"; // Redirect to dashboard on successful registration
+        } else {
+          TODO;
+          alert(data.message); // Display error message
+        }
       })
       .catch((error) => {
         console.error("Error:", error);
