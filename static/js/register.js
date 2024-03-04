@@ -1,38 +1,58 @@
 document.addEventListener("DOMContentLoaded", function () {
   const overlay = document.querySelector(".overlay");
   const popupForm = document.querySelector(".new-form-container");
-  // Get references to the register form and new form container
   const registerForm = document.querySelector(".register-form");
   const newForm = document.querySelector(".depositForm");
+  const customMessageBox = document.querySelector(".custom-message-box");
+  const customMessage = document.querySelector(".custom-message");
+  const customMessageOkayButton = document.querySelector(
+    ".custom-message__btn"
+  );
+
+  const showAlert = (message) => {
+    overlay.classList.remove("hidden");
+    customMessageBox.classList.remove("hidden");
+    customMessage.textContent = message;
+    document.body.classList.add("blur-background");
+  };
+
+  const hideAlert = () => {
+    overlay.classList.add("hidden");
+    customMessageBox.classList.add("hidden");
+    document.body.classList.remove("blur-background");
+  };
+
+  document.querySelector(".overlay").addEventListener("click", hideAlert);
+
+  customMessageOkayButton.addEventListener("click", hideAlert);
 
   registerForm.addEventListener("submit", function (event) {
     event.preventDefault(); // Prevent form submission
 
-    // Show overlay
-    overlay.style.display = "block";
+    const usernameInput = registerForm.querySelector('input[name="username"]');
+    const passwordInput = registerForm.querySelector('input[name="password"]');
 
-    // // Apply blur effect to background
+    // Check if the username or password fields are empty
+    if (!usernameInput.value.trim()) return showAlert("Input username");
+    if (!passwordInput.value.trim()) return showAlert("Input password");
+
+    overlay.classList.remove("hidden");
+    popupForm.classList.remove("hidden");
     document.body.classList.add("blur-background");
-    // document.querySelector(".overlay").classList.add("blur-background");
 
-    // Show new form container
-    popupForm.style.display = "block";
+    // After registerForm submission, listen to newForm submission
+    newForm.addEventListener("submit", handleNewFormSubmission);
   });
 
-  // Add event listener to the deposit amount form submit button
-  newForm.addEventListener("submit", function (event) {
-    // Prevent the default form submission behavior
+  const handleNewFormSubmission = function (event) {
     event.preventDefault();
 
-    // Gather data from both forms
     const registerFormData = new FormData(registerForm);
     const newFormData = new FormData(newForm);
 
-    // Clear form
     registerForm.reset();
     newForm.reset();
 
-    // Combine data from both forms into a single FormData object
     const combinedFormData = new FormData();
     for (const [key, value] of registerFormData.entries()) {
       combinedFormData.append(key, value);
@@ -41,7 +61,6 @@ document.addEventListener("DOMContentLoaded", function () {
       combinedFormData.append(key, value);
     }
 
-    // Make an AJAX request to the Flask server
     fetch("/register", {
       method: "POST",
       body: combinedFormData,
@@ -49,23 +68,16 @@ document.addEventListener("DOMContentLoaded", function () {
       .then((response) => response.json())
       .then((data) => {
         if (data.success) {
-          window.location.href = "/"; // Redirect to dashboard on successful registration
+          window.location.href = "/";
         } else {
-          TODO;
-          alert(data.message); // Display error message
+          showAlert(data.message);
         }
       })
       .catch((error) => {
         console.error("Error:", error);
       });
 
-    overlay.style.display = "none";
-    popupForm.style.display = "none";
-  });
-
-  document.querySelector(".overlay").addEventListener("click", () => {
-    // Hide the overlay and new form container
-    overlay.style.display = "none";
-    popupForm.style.display = "none";
-  });
+    overlay.classList.add("hidden");
+    popupForm.classList.add("hidden");
+  };
 });

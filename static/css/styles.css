@@ -44,7 +44,7 @@ nav {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding-top: 25vh;
+  padding-top: 20vh;
 }
 
 .login-nav {
@@ -55,6 +55,11 @@ nav {
   font-size: 1.5em;
   width: 20rem;
   justify-content: flex-end;
+}
+
+.login-title,
+.register-title {
+  margin-bottom: 3rem;
 }
 
 .register__input,
@@ -89,6 +94,7 @@ nav {
   color: inherit;
   cursor: pointer;
   transition: all 0.3s;
+  color: #008000;
 }
 
 .register__btn:hover,
@@ -103,13 +109,21 @@ nav {
 
 /*  -- REGISTER -- */
 
+.custom-message__btn,
 .register__btn {
   font-size: 2.2rem;
-  color: #007bff !important;
   font-weight: 50;
   color: inherit;
   cursor: pointer;
   transition: all 0.3s;
+}
+
+.register__btn {
+  color: #007bff;
+}
+
+.custom-message__btn {
+  color: #ff3333;
 }
 
 /* CSS for overlay */
@@ -126,6 +140,7 @@ nav {
   opacity: 1;
 }
 
+.custom-message-box,
 .new-form-container {
   border-radius: 5px;
   position: fixed;
@@ -138,11 +153,11 @@ nav {
   border: 1px solid #ccc;
   padding: 30px;
   z-index: 999999999;
-
   transition: opacity 0.5s ease-in-out;
   opacity: 1;
 }
 
 .hidden {
-  display: none;
+  visibility: hidden;
+  opacity: 0;
 }

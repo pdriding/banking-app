@@ -1,0 +1,16 @@
+<!-- Navigation for logged-in users -->
+<nav>
+  <p class="welcome">Welcome</p>
+  <div class="text-center">
+    <img
+      src="{{ url_for('static', filename='images/logo.png') }}"
+      alt="Logo"
+      class="logo"
+    />
+  </div>
+  <ul class="login-nav">
+    <li class="nav-item">
+      <a class="nav-link" href="/logout">Logout</a>
+    </li>
+  </ul>
+</nav>
