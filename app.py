@@ -33,7 +33,21 @@ def after_request(response):
 @app.route("/")
 @login_required
 def index():
-    return render_template('index.html')
+    user_id = session['user_id']  
+    user_data = db.execute("""
+        SELECT 
+               users.username, 
+               transactions.transaction_type, 
+               transactions.transaction_date, 
+               transactions.transaction_amount, 
+               balance.current_balance
+        FROM users
+        LEFT JOIN transactions ON users.user_id = transactions.user_id
+        LEFT JOIN balance ON users.user_id = balance.user_id
+        WHERE users.user_id = ?;
+    """, user_id)
+    print(user_data)
+    return render_template('index.html', user_data=user_data)
 
 @app.route("/login", methods=["GET", "POST"])
 def login():
@@ -57,15 +71,14 @@ def login():
         rows = db.execute(
             "SELECT * FROM users WHERE username = ?", request.form.get("username")
         )
+        print(rows)
+        
+        if len(rows) == 0 or not check_password_hash(rows[0]["hash"], request.form.get("password")):
+            return jsonify({"success": False, "message": "Invalid username and/or password"}), 403
 
-        # Ensure username exists and password is correct
-        if len(rows) != 1 or not check_password_hash(
-            rows[0]["hash"], request.form.get("password")
-        ):
-            jsonify({"success": False, "message": "invalid username and/or password"}), 403
 
         # Remember which user has logged in
-        session["user_id"] = rows[0]["id"]
+        session["user_id"] = rows[0]["user_id"]
 
         # Return success message
         return jsonify({"success": True}), 200
@@ -106,16 +119,42 @@ def register():
             return jsonify({"success": False, "message": "Deposit amount must be a valid number"}), 400
         
         hashed_password = generate_password_hash(confirmation)
-        
+
         try:
-            db.execute("INSERT INTO users (username, hash, cash) VALUES (?, ?, ?)", username, hashed_password, deposit_amount)
-            return jsonify({"success": True}), 200
+            
+            # Insert a new user into the users table
+            db.execute("INSERT INTO users (username, hash) VALUES (?, ?)", username, hashed_password)
+    
+            # Retrieve the user_id of the newly inserted user
+            user_query = db.execute("SELECT user_id FROM users WHERE username = ?", username)
+            user_id = user_query[0]['user_id']
+            if user_id:    
+                # Insert the user's initial balance into the balance table
+                # Assuming deposit_amount is previously defined
+                db.execute("INSERT INTO balance (user_id, current_balance) VALUES (?, ?)", user_id, deposit_amount)
+            else:
+                raise Exception("User not found after insertion into users table")
         except Exception as e:
-            print("Database Error:", e)
-            return jsonify({"success": False, "message": "An error occurred while registering"}), 500
+            print("Balance Insertion Error:", e)
+            # Rollback the transaction if an error occurs
+            
+            return jsonify({"success": False, "message": "An error occurred while inserting balance"}), 500
+
+        return jsonify({"success": True}), 200
+
         
 
     else:
         # If it's a GET request, just return the registration page
         return render_template('register.html')
 
+
+@app.route("/logout")
+def logout():
+    """Log user out"""
+
+    # Forget any user_id
+    session.clear()
+
+    # Redirect user to login form
+    return redirect("/")
