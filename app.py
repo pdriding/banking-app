@@ -30,24 +30,30 @@ def after_request(response):
     response.headers["Pragma"] = "no-cache"
     return response
 
+@app.route("/get_user_data")
+@login_required
+def data():
+    user_id = session['user_id']  
+    user_data = db.execute("""
+            SELECT 
+                users.username,   
+                balance.current_balance
+            FROM users
+            LEFT JOIN balance ON users.user_id = balance.user_id
+            WHERE users.user_id = ?;
+        """, user_id)
+    print(user_data)
+    # Convert user_data to a list of dictionaries
+    user_data_list = [{
+        'username': row['username'],
+        'current_balance': row['current_balance'] if row['current_balance'] is not None else 0.0 
+    } for row in user_data]
+    return jsonify(user_data=user_data_list)
+
 @app.route("/")
 @login_required
 def index():
-    user_id = session['user_id']  
-    user_data = db.execute("""
-        SELECT 
-               users.username, 
-               transactions.transaction_type, 
-               transactions.transaction_date, 
-               transactions.transaction_amount, 
-               balance.current_balance
-        FROM users
-        LEFT JOIN transactions ON users.user_id = transactions.user_id
-        LEFT JOIN balance ON users.user_id = balance.user_id
-        WHERE users.user_id = ?;
-    """, user_id)
-    print(user_data)
-    return render_template('index.html', user_data=user_data)
+    return render_template('index.html')
 
 @app.route("/login", methods=["GET", "POST"])
 def login():
@@ -152,7 +158,7 @@ def register():
 @app.route("/logout")
 def logout():
     """Log user out"""
-
+    print('hhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh')
     # Forget any user_id
     session.clear()
 
