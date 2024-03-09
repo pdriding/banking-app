@@ -25,14 +25,7 @@ main %}
       <button class="btn login__btn btn-block" type="submit">&rarr;</button>
     </form>
   </div>
-  <!-- Overlay -->
-  <div class="overlay hidden"></div>
 
-  <!-- Custom message -->
-  <div class="custom-message-box hidden">
-    <h2 class="custom-message"></h2>
-    <button class="btn custom-message__btn">&times;</button>
-  </div>
+  <script src="{{ url_for('static', filename='js/login.js') }}"></script>
+  {% endblock %}
 </div>
-<script src="{{ url_for('static', filename='js/login.js') }}"></script>
-{% endblock %}

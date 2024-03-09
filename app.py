@@ -4,6 +4,7 @@ from cs50 import SQL
 from flask import Flask, flash, redirect, render_template, request, session, jsonify
 from flask_session import Session
 from werkzeug.security import check_password_hash, generate_password_hash
+from datetime import date
 
 from helpers import apology, login_required, usd
 
@@ -158,9 +159,67 @@ def register():
 @app.route("/logout")
 def logout():
     """Log user out"""
-    print('hhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh')
     # Forget any user_id
     session.clear()
-
     # Redirect user to login form
     return redirect("/")
+
+
+@app.route("/request_loan", methods=["POST"])
+def request_loan():
+    data = request.json
+    amount = data.get("amount")
+
+    if not amount:
+        return jsonify({"success": False, "message": "Please enter loan amount"}), 602
+
+    user_query = db.execute("SELECT current_balance FROM balance WHERE user_id = ?", session["user_id"])
+    balance = user_query[0]['current_balance']
+    
+    if balance / 100 * 41 > amount:
+        db.execute("UPDATE balance SET current_balance = current_balance + ? WHERE user_id = ?", amount, session["user_id"])
+        db.execute("INSERT INTO transactions (user_id, transaction_type, transaction_date, transaction_amount) VALUES (?, ?, ?, ?)", session["user_id"], "deposit", date.today(), amount)
+        
+        return jsonify({"success": True, "message": "Loan successful"}), 200
+    else:
+        return jsonify({"success": False, "message": "Not enough cash for loan"}), 608
+
+
+
+
+@app.route("/transfer", methods=["POST"])
+def transfer_money():
+    # Get data from the request
+    data = request.json
+
+    recipient = data.get("recipient")
+    if not recipient:
+        return jsonify({"success": False, "message": "Please enter recipient"}), 702
+    
+    amount = data.get("amount")
+    if not amount:
+        return jsonify({"success": False, "message": "Please enter amount"}), 703
+
+    # Retrieve the user_id of the recipient
+    user_query = db.execute("SELECT user_id FROM users WHERE username = ?", recipient)
+    user_id = user_query[0]['user_id'] if user_query else None
+    
+    if user_id:
+        # Retrieve the user's balance
+        balance_query = db.execute("SELECT current_balance FROM balance WHERE user_id = ?", session["user_id"])
+        user_balance = balance_query[0]['current_balance']
+
+        if user_balance >= amount:
+            # Add money to recipient's account and record transaction
+            db.execute("UPDATE balance SET current_balance = current_balance + ? WHERE user_id = ?", amount, user_id)
+            db.execute("INSERT INTO transactions (user_id, transaction_type, transaction_date, transaction_amount) VALUES (?, ?, ?, ?)", user_id, "deposit", date.today(), amount)
+
+            # Withdraw money from user's account and record transaction
+            db.execute("UPDATE balance SET current_balance = current_balance - ? WHERE user_id = ?", amount, session["user_id"])
+            db.execute("INSERT INTO transactions (user_id, transaction_type, transaction_date, transaction_amount) VALUES (?, ?, ?, ?)", session["user_id"], "withdraw", date.today(), amount)
+
+            return jsonify({"success": True, "message": "Money transferred successfully"}), 200
+        else:
+            return jsonify({"success": False, "message": "Not enough money in your account"}), 409
+    else:
+        return jsonify({"success": False, "message": "Recipient does not exist"}), 408

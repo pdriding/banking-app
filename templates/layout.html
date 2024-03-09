@@ -46,6 +46,19 @@
     <!-- Main content -->
     <main class="app container py-5 text-center">
       {% block main %}{% endblock %}
+      <!-- Overlay -->
+      <div class="overlay hidden"></div>
+
+      <!-- Custom message -->
+      <div class="custom-message-box hidden">
+        <h2 class="custom-message"></h2>
+        <button class="btn custom-message__btn">&times;</button>
+      </div>
+
+      <!-- Spinner -->
+      <div class="spinner-container hidden">
+        <span class="spinner"></span>
+      </div>
     </main>
 
     <!-- Footer -->
