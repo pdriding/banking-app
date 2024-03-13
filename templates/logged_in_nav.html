@@ -1,6 +1,6 @@
 <!-- Navigation for logged-in users -->
 <nav>
-  <p class="welcome">Welcome</p>
+  <p class="welcome">Welcome, {{ session["username"] }}</p>
   <div class="text-center">
     <img
       src="{{ url_for('static', filename='images/logo.png') }}"

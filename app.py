@@ -1,12 +1,15 @@
 import os
 
 from cs50 import SQL
-from flask import Flask, flash, redirect, render_template, request, session, jsonify
+from flask import Flask, flash, redirect, render_template, request, session, jsonify,  url_for
 from flask_session import Session
 from werkzeug.security import check_password_hash, generate_password_hash
 from datetime import date
 
 from helpers import apology, login_required, usd
+
+from password_validation import PASSWORD_REGEX
+import re
 
 # Configure application
 app = Flask(__name__, static_folder='static')
@@ -43,7 +46,6 @@ def data():
             LEFT JOIN balance ON users.user_id = balance.user_id
             WHERE users.user_id = ?;
         """, user_id)
-    print(user_data)
     # Convert user_data to a list of dictionaries
     user_data_list = [{
         'username': row['username'],
@@ -54,12 +56,20 @@ def data():
 @app.route("/")
 @login_required
 def index():
-    return render_template('index.html')
+    user_id = session['user_id']  
+    user_data = db.execute("""
+            SELECT 
+                username
+            FROM users
+            WHERE user_id = ?;
+        """, user_id)
+    username = user_data[0]['username']
+    session["username"] = username
+    return render_template('index.html', username=username)
 
 @app.route("/login", methods=["GET", "POST"])
 def login():
     """Log user in"""
-
     # Forget any user_id
     session.clear()
 
@@ -78,7 +88,6 @@ def login():
         rows = db.execute(
             "SELECT * FROM users WHERE username = ?", request.form.get("username")
         )
-        print(rows)
         
         if len(rows) == 0 or not check_password_hash(rows[0]["hash"], request.form.get("password")):
             return jsonify({"success": False, "message": "Invalid username and/or password"}), 403
@@ -93,6 +102,31 @@ def login():
     # User reached route via GET (as by clicking a link or via redirect)
     else:
         return render_template("login.html")
+    
+
+@app.route("/validate_password", methods=["POST"])
+def validate_password():
+        data = request.json
+        username = data.get('username')
+        confirmation = data.get('password')
+        if not username:
+            return jsonify({"success": False, "message": "Must provide username"}), 400
+        
+         # Query the database to check if the username already exists
+        existing_user = db.execute("SELECT * FROM users WHERE username = ?", (username,))
+        
+        if existing_user:
+            return jsonify({"success": False, "message": "Username already exists"}), 400
+        
+        
+        if not confirmation:
+            return jsonify({"success": False, "message": "Please choose a password"}), 400
+        
+        if not re.match(PASSWORD_REGEX, confirmation):
+            return jsonify({"success": False, "message": "Password must be more than 3 charachters"}), 400
+        
+            # If password validation is successful, return success message
+        return jsonify({"success": True, "message": "Password validation successful"}), 200
 
 
 @app.route("/register", methods=["GET", "POST"])
@@ -112,6 +146,9 @@ def register():
         confirmation = request.form.get('password')
         if not confirmation:
             return jsonify({"success": False, "message": "Please choose a password"}), 400
+        
+        if not re.match(PASSWORD_REGEX, confirmation):
+            return jsonify({"success": False, "message": "Password must be more than 3 charachters"}), 400
         
         deposit_amount = request.form.get('deposit')
 
@@ -139,6 +176,7 @@ def register():
                 # Insert the user's initial balance into the balance table
                 # Assuming deposit_amount is previously defined
                 db.execute("INSERT INTO balance (user_id, current_balance) VALUES (?, ?)", user_id, deposit_amount)
+                db.execute("INSERT INTO transactions (user_id, transaction_type, transaction_date, transaction_amount) VALUES (?, ?, ?, ?)", user_id, "deposit", date.today(), deposit_amount)
             else:
                 raise Exception("User not found after insertion into users table")
         except Exception as e:
@@ -149,23 +187,36 @@ def register():
 
         return jsonify({"success": True}), 200
 
-        
-
     else:
         # If it's a GET request, just return the registration page
         return render_template('register.html')
+    
 
+@app.route("/movements", methods=["GET"])
+def movements():
+    user_id = session['user_id']  
+    user_movements = db.execute("""
+            SELECT 
+                transaction_id,   
+                transaction_type,
+                transaction_date,
+                transaction_amount
+            FROM transactions
+            WHERE user_id = ?;
+        """, user_id)
+    # Convert user_data to a list of dictionaries
+    user_movements_list = [{
+        'transaction_id': row['transaction_id'],
+         'transaction_type': row['transaction_type'],
+         'transaction_date': row['transaction_date'],
+         'transaction_amount': row['transaction_amount'],
+    } for row in user_movements]
+    return jsonify(user_movements=user_movements_list)
 
-@app.route("/logout")
-def logout():
-    """Log user out"""
-    # Forget any user_id
-    session.clear()
-    # Redirect user to login form
-    return redirect("/")
 
 
 @app.route("/request_loan", methods=["POST"])
+@login_required
 def request_loan():
     data = request.json
     amount = data.get("amount")
@@ -187,7 +238,9 @@ def request_loan():
 
 
 
+
 @app.route("/transfer", methods=["POST"])
+@login_required
 def transfer_money():
     # Get data from the request
     data = request.json
@@ -223,3 +276,43 @@ def transfer_money():
             return jsonify({"success": False, "message": "Not enough money in your account"}), 409
     else:
         return jsonify({"success": False, "message": "Recipient does not exist"}), 408
+    
+
+@app.route("/close_account")
+@login_required
+def close():
+    user_id = session["user_id"]
+
+    try:
+        # Delete transactions associated with the user
+        db.execute('DELETE FROM transactions WHERE user_id = ?', user_id)
+
+        # Delete balance information associated with the user
+        db.execute('DELETE FROM balance WHERE user_id = ?', user_id)
+
+        # Delete the user from the users table
+        db.execute('DELETE FROM users WHERE user_id = ?', user_id)
+
+        return jsonify({"success": True, "message": 'User Deleted', "redirect_url": url_for('logout')}), 200
+        # return jsonify({"success": True, "message": "yessss"}), 200
+        
+        
+    except Exception as e:
+        # Handle any errors that occur during the deletion process
+        return jsonify({"success": False, "message": "Error occurred during account closure"}), 809
+        # You might want to flash a message to the user or log the error
+    
+    # Clear the session and redirect the user to the login page
+    session.clear()
+    return redirect("/l")
+
+
+
+@app.route("/logout")
+@login_required
+def logout():
+    """Log user out"""
+    # Forget any user_id
+    session.clear()
+    # Redirect user to login form
+    return redirect("/")

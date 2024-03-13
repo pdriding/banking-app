@@ -17,11 +17,27 @@ body {
   padding: 2rem;
 }
 
+body {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
 nav {
   display: flex;
   justify-content: space-between;
   align-items: center;
   padding: 0 2rem;
+}
+
+/* -- Layout -- */
+
+.app {
+  flex: 1;
+}
+
+.footer {
+  flex-shrink: 0;
 }
 
 .welcome {
@@ -101,8 +117,8 @@ nav {
 .register__btn:focus,
 .login__btn:hover,
 .login__btn:focus,
-.btn--sort:hover,
-.btn--sort:focus {
+.dropdown--sort:hover,
+.dropdown--sort:focus {
   outline: none;
   color: #777;
 }
@@ -201,7 +217,7 @@ nav {
   background-image: linear-gradient(to top left, #39b385, #9be15d);
 }
 
-.movements__type--withdrawal {
+.movements__type--withdraw {
   background-image: linear-gradient(to top left, #e52a5a, #ff585f);
 }
 
@@ -240,13 +256,18 @@ nav {
   color: #f5465d;
 }
 
-.btn--sort {
+.dropdown--sort {
   margin-left: auto;
   border: none;
   background: none;
   font-size: 1.3rem;
   font-weight: 500;
   cursor: pointer;
+}
+
+.dropdown--sort option[disabled] {
+  font-style: italic;
+  cursor: default;
 }
 
 /* OPERATIONS */
@@ -407,4 +428,8 @@ h2 {
   display: flex;
   justify-content: center;
   align-items: center;
+}
+
+.timer {
+  font-family: "Source Code Pro", monospace;
 }

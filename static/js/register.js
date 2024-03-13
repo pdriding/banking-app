@@ -9,6 +9,7 @@ document.addEventListener("DOMContentLoaded", function () {
     ".custom-message__btn"
   );
 
+  // TODO alerts button.focus()
   const showAlert = (message) => {
     overlay.classList.remove("hidden");
     customMessageBox.classList.remove("hidden");
@@ -36,12 +37,36 @@ document.addEventListener("DOMContentLoaded", function () {
     if (!usernameInput.value.trim()) return showAlert("Input username");
     if (!passwordInput.value.trim()) return showAlert("Input password");
 
-    overlay.classList.remove("hidden");
-    popupForm.classList.remove("hidden");
-    document.body.classList.add("blur-background");
+    const userData = {
+      username: usernameInput.value.trim(),
+      password: passwordInput.value.trim(),
+    };
 
-    // After registerForm submission, listen to newForm submission
-    newForm.addEventListener("submit", handleNewFormSubmission);
+    // Make a fetch request with the password data
+    fetch("/validate_password", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      }, // Send password in the request body
+      body: JSON.stringify(userData),
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        if (data.success) {
+          overlay.classList.remove("hidden");
+          popupForm.classList.remove("hidden");
+          document.body.classList.add("blur-background");
+
+          // After registerForm submission, listen to newForm submission
+          newForm.addEventListener("submit", handleNewFormSubmission);
+        } else {
+          showAlert(data.message);
+        }
+      })
+      .catch((error) => {
+        // Handle fetch error
+        console.error("Error:", error);
+      });
   });
 
   const handleNewFormSubmission = function (event) {
