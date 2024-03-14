@@ -73,5 +73,9 @@
     You will be logged out in <span class="timer"></span>
   </p>
 </div>
-<script src="{{ url_for('static', filename='js/index.js') }}"></script>
+<!-- <script src="{{ url_for('static', filename='js/index.js') }}"></script> -->
+<script
+  src="{{ url_for('static', filename='js/index.js') }}"
+  type="module"
+></script>
 {% endblock %}

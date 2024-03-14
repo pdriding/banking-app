@@ -108,7 +108,8 @@ def login():
 def validate_password():
         data = request.json
         username = data.get('username')
-        confirmation = data.get('password')
+        password = data.get('password')
+        confirmation = data.get('confirmation')
         if not username:
             return jsonify({"success": False, "message": "Must provide username"}), 400
         
@@ -118,12 +119,17 @@ def validate_password():
         if existing_user:
             return jsonify({"success": False, "message": "Username already exists"}), 400
         
+        if not password:
+            return jsonify({"success": False, "message": "Please enter a password"}), 400
         
         if not confirmation:
-            return jsonify({"success": False, "message": "Please choose a password"}), 400
+            return jsonify({"success": False, "message": "Please confirm password"}), 400
         
         if not re.match(PASSWORD_REGEX, confirmation):
             return jsonify({"success": False, "message": "Password must be more than 3 charachters"}), 400
+        
+        if password != confirmation:
+            return jsonify({"success": False, "message": "Password and confirmation do not match"}), 400
         
             # If password validation is successful, return success message
         return jsonify({"success": True, "message": "Password validation successful"}), 200
@@ -142,13 +148,19 @@ def register():
         if existing_user:
             return jsonify({"success": False, "message": "Username already exists"}), 400
         
-        # TODO password validation
-        confirmation = request.form.get('password')
+        confirmation = request.form.get('confirmation')
         if not confirmation:
-            return jsonify({"success": False, "message": "Please choose a password"}), 400
+            return jsonify({"success": False, "message": "Please confrim password"}), 400
         
         if not re.match(PASSWORD_REGEX, confirmation):
             return jsonify({"success": False, "message": "Password must be more than 3 charachters"}), 400
+        
+        password = request.form.get('password')
+        if not password:
+            return jsonify({"success": False, "message": "Please choose a password"}), 400
+        
+        if password != confirmation:
+            return jsonify({"success": False, "message": "Password and confirmation do not match"}), 400
         
         deposit_amount = request.form.get('deposit')
 

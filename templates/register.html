@@ -10,7 +10,7 @@ main %}
           autofocus
           class="form-control-1 register__input register__input--user"
           name="username"
-          placeholder="user"
+          placeholder="username"
           type="text"
         />
       </div>
@@ -19,6 +19,14 @@ main %}
           class="form-control-1 register__input register__input--pin"
           name="password"
           placeholder="PIN"
+          type="password"
+        />
+      </div>
+      <div class="mb-3">
+        <input
+          class="form-control-1 register__input register__input--pin"
+          name="confirmation"
+          placeholder="confirm PIN"
           type="password"
         />
       </div>
@@ -40,5 +48,8 @@ main %}
     </form>
   </div>
 </div>
-<script src="{{ url_for('static', filename='js/register.js') }}"></script>
+<script
+  src="{{ url_for('static', filename='js/register.js') }} "
+  type="module"
+></script>
 {% endblock %}
