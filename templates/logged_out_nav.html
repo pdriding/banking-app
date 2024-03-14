@@ -1,0 +1,20 @@
+<!-- Navigation for non-logged-in users -->
+<nav>
+  <p class="welcome">Log in to get started</p>
+  <div class="text-center">
+    <img
+      src="{{ url_for('static', filename='images/logo.png') }}"
+      alt="Logo"
+      class="logo"
+    />
+  </div>
+
+  <ul class="login-nav">
+    <li class="nav-item">
+      <a class="nav-link" href="/register">Register</a>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link" href="/login">Log In</a>
+    </li>
+  </ul>
+</nav>

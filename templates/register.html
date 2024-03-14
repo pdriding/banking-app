@@ -3,13 +3,14 @@ main %}
 <div class="container d-flex justify-content-center align-items-center">
   <div class="row">
     <form action="/register" method="post" class="register-form">
+      <h2 class="register-title">Register</h2>
       <div class="mb-3">
         <input
           autocomplete="off"
           autofocus
           class="form-control-1 register__input register__input--user"
           name="username"
-          placeholder="user"
+          placeholder="username"
           type="text"
         />
       </div>
@@ -21,11 +22,18 @@ main %}
           type="password"
         />
       </div>
+      <div class="mb-3">
+        <input
+          class="form-control-1 register__input register__input--pin"
+          name="confirmation"
+          placeholder="confirm PIN"
+          type="password"
+        />
+      </div>
       <button class="btn register__btn" type="submit">&plus;</button>
     </form>
   </div>
-  <!-- Overlay -->
-  <div class="overlay hidden"></div>
+
   <!-- New form container -->
   <div class="container new-form-container hidden">
     <form action="/register" class="depositForm">
@@ -40,4 +48,8 @@ main %}
     </form>
   </div>
 </div>
+<script
+  src="{{ url_for('static', filename='js/register.js') }} "
+  type="module"
+></script>
 {% endblock %}

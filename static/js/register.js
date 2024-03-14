@@ -1,43 +1,99 @@
-document.addEventListener("DOMContentLoaded", function () {
-  // Your JavaScript code here
-  console.log("DOM fully loaded and parsed");
+import MessageHandler from "./messageHandler.js";
 
-  console.log("helo");
+class RegistrationForm {
+  constructor() {
+    this.overlay = document.querySelector(".overlay");
+    this.popupForm = document.querySelector(".new-form-container");
+    this.registerForm = document.querySelector(".register-form");
+    this.newForm = document.querySelector(".depositForm");
 
-  const overlay = document.querySelector(".overlay");
-  const popupForm = document.querySelector(".new-form-container");
-  // Get references to the register form and new form container
-  const registerForm = document.querySelector(".register-form");
-  const newForm = document.querySelector(".depositForm");
+    this.messageHandler = new MessageHandler();
+    this.handleNewFormSubmission = this.handleNewFormSubmission.bind(this);
 
-  registerForm.addEventListener("submit", function (event) {
-    event.preventDefault(); // Prevent form submission
+    this.initialize();
+  }
 
-    // Show overlay
-    overlay.style.display = "block";
+  initialize() {
+    this.overlay.addEventListener("click", this.hideDepositForm.bind(this));
+    this.registerForm.addEventListener(
+      "submit",
+      this.handleRegistration.bind(this)
+    );
+  }
 
-    // // Apply blur effect to background
+  showAlert(message) {
+    this.messageHandler.showAlert(message);
+  }
+
+  hideAlert() {
+    this.messageHandler.hideAlert();
+  }
+
+  showDepositForm() {
+    this.overlay.classList.remove("hidden");
+    this.popupForm.classList.remove("hidden");
     document.body.classList.add("blur-background");
-    // document.querySelector(".overlay").classList.add("blur-background");
+  }
 
-    // Show new form container
-    popupForm.style.display = "block";
-  });
+  hideDepositForm() {
+    console.log("form");
+    this.overlay.classList.add("hidden");
+    this.popupForm.classList.add("hidden");
+  }
 
-  // Add event listener to the deposit amount form submit button
-  newForm.addEventListener("submit", function (event) {
-    // Prevent the default form submission behavior
+  handleRegistration(event) {
     event.preventDefault();
 
-    // Gather data from both forms
-    const registerFormData = new FormData(registerForm);
-    const newFormData = new FormData(newForm);
+    const usernameInput = this.registerForm.querySelector(
+      'input[name="username"]'
+    );
+    const passwordInput = this.registerForm.querySelector(
+      'input[name="password"]'
+    );
+    const confirmationInput = this.registerForm.querySelector(
+      'input[name="confirmation"]'
+    );
 
-    // Clear form
-    registerForm.reset();
-    newForm.reset();
+    if (!usernameInput.value.trim()) return this.showAlert("Input username");
+    if (!passwordInput.value.trim()) return this.showAlert("Input password");
+    if (!confirmationInput.value.trim())
+      return this.showAlert("Input confirmation");
 
-    // Combine data from both forms into a single FormData object
+    const userData = {
+      username: usernameInput.value.trim(),
+      password: passwordInput.value.trim(),
+      confirmation: confirmationInput.value.trim(),
+    };
+
+    fetch("/validate_password", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(userData),
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        if (data.success) {
+          this.showDepositForm();
+          this.newForm.addEventListener("submit", this.handleNewFormSubmission);
+        } else {
+          this.showAlert(data.message);
+        }
+      })
+      .catch((error) => {
+        console.error("Error:", error);
+      });
+  }
+
+  handleNewFormSubmission(event) {
+    event.preventDefault();
+
+    const registerFormData = new FormData(this.registerForm);
+    const newFormData = new FormData(this.newForm);
+    this.registerForm.reset();
+    this.newForm.reset();
+
     const combinedFormData = new FormData();
     for (const [key, value] of registerFormData.entries()) {
       combinedFormData.append(key, value);
@@ -46,27 +102,24 @@ document.addEventListener("DOMContentLoaded", function () {
       combinedFormData.append(key, value);
     }
 
-    // Make an AJAX request to the Flask server
     fetch("/register", {
       method: "POST",
       body: combinedFormData,
     })
-      .then((response) => response.text())
+      .then((response) => response.json())
       .then((data) => {
-        // Handle the response as needed
-        console.log("Forms submitted successfully:", data);
+        if (data.success) {
+          window.location.href = "/";
+        } else {
+          this.showAlert(data.message);
+        }
       })
       .catch((error) => {
         console.error("Error:", error);
       });
+  }
+}
 
-    overlay.style.display = "none";
-    popupForm.style.display = "none";
-  });
-
-  document.querySelector(".overlay").addEventListener("click", () => {
-    // Hide the overlay and new form container
-    overlay.style.display = "none";
-    popupForm.style.display = "none";
-  });
+document.addEventListener("DOMContentLoaded", () => {
+  new RegistrationForm();
 });
