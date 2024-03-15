@@ -99,7 +99,6 @@ def login():
         # Return success message
         return jsonify({"success": True}), 200
 
-    # User reached route via GET (as by clicking a link or via redirect)
     else:
         return render_template("login.html")
     
@@ -186,14 +185,13 @@ def register():
             user_id = user_query[0]['user_id']
             if user_id:    
                 # Insert the user's initial balance into the balance table
-                # Assuming deposit_amount is previously defined
+    
                 db.execute("INSERT INTO balance (user_id, current_balance) VALUES (?, ?)", user_id, deposit_amount)
                 db.execute("INSERT INTO transactions (user_id, transaction_type, transaction_date, transaction_amount) VALUES (?, ?, ?, ?)", user_id, "deposit", date.today(), deposit_amount)
             else:
                 raise Exception("User not found after insertion into users table")
         except Exception as e:
             print("Balance Insertion Error:", e)
-            # Rollback the transaction if an error occurs
             
             return jsonify({"success": False, "message": "An error occurred while inserting balance"}), 500
 
@@ -312,11 +310,9 @@ def close():
     except Exception as e:
         # Handle any errors that occur during the deletion process
         return jsonify({"success": False, "message": "Error occurred during account closure"}), 809
-        # You might want to flash a message to the user or log the error
+        
     
-    # Clear the session and redirect the user to the login page
-    session.clear()
-    return redirect("/l")
+   
 
 
 
